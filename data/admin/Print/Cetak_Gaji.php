@@ -1,0 +1,201 @@
+<?php
+require('../../../config/mc_table_admin.php');
+include('../../../config/koneksi.php');
+
+define('FPDF_FONTPATH', '../../../PDF/font/');
+Class Cetak extends FPDF{
+    function Header(){
+        $this->Image('../images/kop_atas.jpg',1,1,200); // Kop
+        $this->Ln(3);
+        $this->Image('../images/pyxis_opac.jpg',15,50,180);
+        $this->Ln(10);
+      }
+
+      function Footer(){
+        $this->SetY(-2,5);
+        $this->Cell(0,1,$this->PageNo(),0,0,'C');
+      }
+    }
+    function rupiah($angka){
+    $hasil_rupiah = "Rp " . number_format($angka,2,',','.');
+    return $hasil_rupiah;
+  }
+
+  $Id_User = $_GET['Id_User'];
+  $amblProfPeg = mysqli_fetch_array(mysqli_query($dbcon,"SELECT * FROM tbl_ProfPeg WHERE Id_User='$Id_User'"));
+  $NoPeg = $amblProfPeg['NoPeg'];
+  $NmPeg = $amblProfPeg['NmPeg'];
+  $amblBioPeg = mysqli_fetch_array(mysqli_query($dbcon,"SELECT * FROM tbl_BioPeg WHERE NoPeg='$NoPeg'"));
+  $Almt = $amblBioPeg['Almt'];
+  $Jbtn = $amblBioPeg['Jbtn'];
+  $JmlhAnak = $amblBioPeg['JmlhAnak'];
+  $amblJabatanPeg = mysqli_fetch_array(mysqli_query($dbcon,"SELECT * FROM tbl_Jbtn WHERE IdJbtn='$Jbtn'"));
+  $NmJbtn = $amblJabatanPeg['NmJbtn'];
+  $Level = $amblJabatanPeg['Level'];
+  $Jabatan = $NmJbtn .' - '. $Level;
+  $Gapok = $amblJabatanPeg['Gapok'];
+  $Bulan = date('m');
+  $Tahun = date('Y');
+  $amblabs = mysqli_fetch_array(mysqli_query($dbcon,"SELECT * FROM tbl_Abs WHERE NoPeg='$NoPeg'"));
+  $OverTime = $amblabs['OverTime'];
+  $nlOverTime = $OverTime*20000;
+  $amblGajiPeg = mysqli_fetch_array(mysqli_query($dbcon,"SELECT * FROM tbl_GajiPeg WHERE NoPeg='$NoPeg' && Bln='$Bulan' && Thn='$Tahun'"));
+  $IdGaji = $amblGajiPeg['IdGaji'];
+  $TunjanganJbtn = $amblGajiPeg['TunjanganJbtn'];
+  $TunjanganPerumahan = $amblGajiPeg['TunjanganPerumahan'];
+  $TunjanganTransport = $amblGajiPeg['TunjanganTransport'];
+  $TunjanganIstri = $amblGajiPeg['TunjanganIstri'];
+  $TunjanganAnak = $amblGajiPeg['TunjanganAnak'];
+  $TunjanganKebijakan = $amblGajiPeg['TunjanganKebijakan'];
+  $THR = $amblGajiPeg['THR'];
+  $nlTunjanganJbtn = $Gapok/100 * $TunjanganJbtn;
+  $nlTunjanganPerumahan = $Gapok/100 * $TunjanganPerumahan;
+  $nlTunjanganTransport = $Gapok/100 * $TunjanganTransport;
+  $nlTunjanganIstri = $Gapok/100 * $TunjanganIstri;
+  $nlTunjanganAnak = $Gapok/100 * $TunjanganAnak;
+  $nlTunjanganKebijakan = $TunjanganKebijakan;
+  $nlTHR = $Gapok/100 * $THR;
+  $Tunjangan = array($nlTunjanganJbtn, $nlTunjanganPerumahan, $nlTunjanganTransport, $nlTunjanganIstri, $nlTunjanganAnak, $nlTunjanganKebijakan,$nlOverTime);
+  $TotalTunjangan = array_sum($Tunjangan);
+  $PotIuranJamsostek = $amblGajiPeg['PotIuranJamsostek'];
+  $PotIuranBPJS = $amblGajiPeg['PotIuranBPJS'];
+  $PotIuranKop = $amblGajiPeg['PotIuranKop'];
+  $DendaLambat = $amblGajiPeg['DendaLambat'];
+  $DendaKetidakhadiran = $amblGajiPeg['DendaKetidakhadiran'];
+  $PotMinCuti = $amblGajiPeg['PotMinCuti'];
+  $Cash = $amblGajiPeg['Cash'];
+  $nlPotIuranJamsostek = $PotIuranJamsostek;
+  $nlPotIuranBPJS = $PotIuranBPJS;
+  $nlPotIuranKop = $PotIuranKop;
+  $nlDendaLambat = $DendaLambat;
+  $nlDendaKetidakhadiran = $DendaKetidakhadiran;
+  $nlPotMinCuti = $PotMinCuti;
+  $nlCash = $Cash;
+  $Potongan = array($nlPotIuranJamsostek, $nlPotIuranBPJS, $nlPotIuranKop, $nlDendaLambat, $nlDendaKetidakhadiran, $nlPotMinCuti, $nlCash);
+  $TotalPotongan = array_sum($Potongan);
+  $TunjanganPlusGapok = $Gapok + $TotalTunjangan;
+  $TakeHomePay = $Gapok + $TotalTunjangan - $TotalPotongan;
+  $Tanggal = date('d/M/Y');
+  $Bln = date('M-Y');
+
+  $pdf = new Cetak('P','mm','A4');
+  $pdf->AddPage();
+  $pdf->Ln(3);
+
+  $pdf->SetFont('Arial','B',8);
+  $pdf->SetFillColor(255,255,255);
+  $pdf->SetTextColor(0,0,0);
+  $pdf->Cell(190,7,'Tanggal Cetak :'.$Tanggal,0,0,'R',true);
+  $pdf->Ln();
+
+  $pdf->SetTextColor(60,60,60);
+  $pdf->SetFont('Times','B','10');
+  $pdf->Cell(200,0,'SLIP GAJI DAN TUNJANGAN',0,0,'C');
+  $pdf->Ln(4);
+  $pdf->Cell(200,0,'PYXIS ULTIMATE SOLUTION',0,0,'C');
+  $pdf->Ln(10);
+
+  $pdf->SetFont('Arial','','8');
+  $pdf->Cell(25,1,'Nama');
+  $pdf->Cell(10,1,'=');
+  $pdf->Cell(4,1,$NmPeg);
+  $pdf->Ln(5);
+  $pdf->Cell(25,1,'Jabatan');
+  $pdf->Cell(10,1,'=');
+  $pdf->Cell(4,1,$Jabatan);
+  $pdf->Ln(10);
+
+  $pdf->SetFont('Arial','B',8);
+  $pdf->SetFillColor(192,192,192);
+  $pdf->SetTextColor(0,0,0);
+  $pdf->SetLineWidth(.3);
+  $pdf->Cell(10,10,'No',1,0,'C',true);
+  $pdf->Cell(150,10,'DESKRIPSI',1,0,'C',true);
+  $pdf->Cell(30,10,'NILAI(Rupiah)',1,0,'C',true);
+  $pdf->Ln();
+  $pdf->SetFont('Arial','',8);
+  $pdf->SetFillColor(255,255,255);
+  $pdf->SetTextColor(0,0,0);
+  $pdf->SetLineWidth(.3);
+  $pdf->Cell(10,7,'1',1,0,'C',false);
+  $pdf->Cell(150,7,'Gaji '. $Bln,1,0,'L',false);
+  $pdf->Cell(30,7,rupiah($Gapok),1,0,'L',false);
+  $pdf->Ln();
+  $pdf->Cell(10,7,'2',1,0,'C',false);
+  $pdf->Cell(150,7,'OverTime '.$OverTime.'jam',1,0,'L',false);
+  $pdf->Cell(30,7,rupiah($nlOverTime),1,0,'L',false);
+  $pdf->Ln();
+  $pdf->Cell(10,7,'2',1,0,'C',false);
+  $pdf->Cell(150,7,'Tunjangan Jabatan '.$TunjanganJbtn.'%',1,0,'L',false);
+  $pdf->Cell(30,7,rupiah($nlTunjanganJbtn),1,0,'L',false);
+  $pdf->Ln();
+  $pdf->Cell(10,7,'3',1,0,'C',false);
+  $pdf->Cell(150,7,'Tunjangan Perumahan '.$TunjanganJbtn.'%',1,0,'L',false);
+  $pdf->Cell(30,7,rupiah($nlTunjanganPerumahan),1,0,'L',false);
+  $pdf->Ln();
+  $pdf->Cell(10,7,'4',1,0,'C',false);
+  $pdf->Cell(150,7,'Tunjangan Transport '.$TunjanganTransport.'%',1,0,'L',false);
+  $pdf->Cell(30,7,rupiah($nlTunjanganTransport),1,0,'L',false);
+  $pdf->Ln();
+  $pdf->Cell(10,7,'5',1,0,'C',false);
+  $pdf->Cell(150,7,'Tunjangan Istri '.$TunjanganIstri.'%',1,0,'L',false);
+  $pdf->Cell(30,7,rupiah($nlTunjanganIstri),1,0,'L',false);
+  $pdf->Ln();
+  $pdf->Cell(10,7,'6',1,0,'C',false);
+  $pdf->Cell(150,7,'Tunjangan Anak ('.$JmlhAnak.') '.$TunjanganAnak.'%',1,0,'L',false);
+  $pdf->Cell(30,7,rupiah($nlTunjanganAnak),1,0,'L',false);
+  $pdf->Ln();
+  $pdf->Cell(10,7,'7',1,0,'C',false);
+  $pdf->Cell(150,7,'Tunjangan Kebijakan',1,0,'L',false);
+  $pdf->Cell(30,7,rupiah($nlTunjanganKebijakan),1,0,'L',false);
+  $pdf->Ln();
+  $pdf->SetFillColor(192,192,192);
+  $pdf->Cell(10,7,'',1,0,'C',true);
+  $pdf->Cell(150,7,'TOTAL',1,0,'R',true);
+  $pdf->Cell(30,7,rupiah($TunjanganPlusGapok),1,0,'L',true);
+  $pdf->Ln();
+  $pdf->SetFillColor(255,255,255);
+  $pdf->Cell(10,7,'8',1,0,'C',false);
+  $pdf->Cell(150,7,'Potongan Iuran Jamsostek',1,0,'L',false);
+  $pdf->Cell(30,7,rupiah($nlPotIuranJamsostek),1,0,'L',false);
+  $pdf->Ln();
+  $pdf->Cell(10,7,'9',1,0,'C',false);
+  $pdf->Cell(150,7,'Potongan Iuran BPJS Kesehatan',1,0,'L',false);
+  $pdf->Cell(30,7,rupiah($nlPotIuranBPJS),1,0,'L',false);
+  $pdf->Ln();
+  $pdf->Cell(10,7,'10',1,0,'C',false);
+  $pdf->Cell(150,7,'Potongan Iuran Koperasi + Pinjaman',1,0,'L',false);
+  $pdf->Cell(30,7,rupiah($nlPotIuranKop),1,0,'L',false);
+  $pdf->Ln();
+  $pdf->Cell(10,7,'11',1,0,'C',false);
+  $pdf->Cell(150,7,'Denda Keterlambatan',1,0,'L',false);
+  $pdf->Cell(30,7,rupiah($nlDendaLambat),1,0,'L',false);
+  $pdf->Ln();
+  $pdf->Cell(10,7,'12',1,0,'C',false);
+  $pdf->Cell(150,7,'Denda Ketidakhadiran',1,0,'L',false);
+  $pdf->Cell(30,7,rupiah($nlDendaKetidakhadiran),1,0,'L',false);
+  $pdf->Ln();
+  $pdf->Cell(10,7,'13',1,0,'C',false);
+  $pdf->Cell(150,7,'Potongan Minus Cuti',1,0,'L',false);
+  $pdf->Cell(30,7,rupiah($nlPotMinCuti),1,0,'L',false);
+  $pdf->Ln();
+  $pdf->Cell(10,7,'13',1,0,'C',false);
+  $pdf->Cell(150,7,'Cash',1,0,'L',false);
+  $pdf->Cell(30,7,rupiah($nlCash),1,0,'L',false);
+  $pdf->Ln();
+  $pdf->SetFillColor(192,192,192);
+  $pdf->Cell(10,7,'',1,0,'C',true);
+  $pdf->Cell(150,7,'TAKE HOME PAY',1,0,'R',true);
+  $pdf->Cell(30,7,rupiah($TakeHomePay),1,0,'L',true);
+  $pdf->Ln(20);
+  $pdf->SetFillColor(255,255,255);
+  $pdf->Cell(95,7,'HRD & GA',0,0,'C',false);
+  $pdf->Cell(95,7,'Penerima,',0,0,'C',false); 
+  $pdf->Ln(7);
+  $pdf->Cell(95,1,'Assistant Manager',0,0,'C',false);
+  $pdf->Ln(20);
+  $pdf->Cell(95,1,'P.Budi Artodibyo',0,0,'C',false);
+  $pdf->Cell(95,1,$NmPeg,0,0,'C',false);
+  $pdf->Ln();
+  $pdf->Output();
+?>

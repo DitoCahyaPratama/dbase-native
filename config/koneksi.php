@@ -1,0 +1,405 @@
+<?php
+	$servername = 'localhost';
+	$username = 'root';
+	$password = '';
+
+	$konek = mysqli_connect($servername,$username,$password);
+	if(!$konek){
+		die("gagal terhubung ke server ".mysqli_connect_error());
+	}else{
+		$db = mysqli_query($konek,'CREATE DATABASE db_dbase_R');
+		if($db){
+			$dbname = 'db_dbase_R';
+			$dbcon = mysqli_connect($servername,$username,$password,$dbname);
+			if(!$dbcon){
+				die("gagal terhubung ke server ".mysqli_connect_error());
+			}
+			else{
+
+				$agm = mysqli_query($dbcon,"CREATE TABLE tbl_Agm(
+										IdAgm INT(9) NOT NULL PRIMARY KEY AUTO_INCREMENT,
+										NmAgm VARCHAR(20) NOT NULL
+									)");
+
+				$komentar = mysqli_query($dbcon,"CREATE TABLE tbl_Komen(
+											IdKom INT(9) NOT NULL PRIMARY KEY AUTO_INCREMENT,
+											Pengirim VARCHAR(20) NOT NULL,
+											Kom TEXT NOT NULL
+										)");
+
+				$Kewarganegaraan = mysqli_query($dbcon,"CREATE TABLE apps_countries(
+													IdKewarganegaraan INT(9) NOT NULL PRIMARY KEY AUTO_INCREMENT,
+													CdNegara VARCHAR(2) NOT NULL,
+													NmKewarganegaraan VARCHAR(100) NOT NULL
+												)");
+				$Jbtn = mysqli_query($dbcon,"CREATE TABLE tbl_Jbtn(
+										IdJbtn INT(9) NOT NULL PRIMARY KEY AUTO_INCREMENT,
+										NmJbtn VARCHAR(20) NOT NULL,
+										Gapok INT(10) NOT NULL,
+										Level VARCHAR(1) NOT NULL,
+										TunjanganJbtn INT(3) NOT NULL
+									)");
+				$naik = mysqli_query($dbcon,"CREATE TABLE tbl_NaikJbtn(
+										NoPeg INT(9) NOT NULL,
+										IdJbtn INT(9) NOT NULL,
+										Tgl TIMESTAMP NOT NULL,
+										ket TEXT NOT NULL
+									)");
+				$tblUser= mysqli_query($dbcon,"CREATE TABLE tbl_User(
+											Id_User INT(9) NOT NULL PRIMARY KEY AUTO_INCREMENT,
+											Uname VARCHAR(20) NOT NULL,
+											Pass VARCHAR(20) NOT NULL,
+											Lvl INT(2) NOT NULL
+										)");
+				$profpeg = mysqli_query($dbcon,"CREATE TABLE tbl_ProfPeg(
+											NoPeg INT(9) NOT NULL PRIMARY KEY,
+											NmPeg VARCHAR(100) NOT NULL,
+											TglGabung date NOT NULL,
+											Id_User INT(9) NOT NULL,
+											FOREIGN KEY (Id_User) REFERENCES tbl_User(Id_User)
+										)");
+				$absensi = mysqli_query($dbcon,"CREATE TABLE tbl_Abs(
+											IdAbs INT(9) NOT NULL PRIMARY KEY AUTO_INCREMENT,
+											NoPeg INT(9) NOT NULL,
+											Hdr INT(9) NOT NULL,
+											Alf INT(9) NOT NULL,
+											Skt INT(9) NOT NULL,
+											Izn INT(9) NOT NULL,
+											Terlambat INT(9) NOT NULL,
+											OverTime INT(9) NOT NULL,
+											Bln INT(2) NOT NULL,
+											Thn INT(4) NOT NULL,
+											FOREIGN KEY (NoPeg) REFERENCES tbl_ProfPeg(NoPeg)
+										)");
+				$biopeg = mysqli_query($dbcon,"CREATE TABLE tbl_BioPeg(
+											NoPeg INT(9) NOT NULL,
+											TmptLhr VARCHAR(50) NOT NULL,
+											TglLhr date NOT NULL,
+											Gndr VARCHAR(10) NOT NULL,
+											Almt VARCHAR(200) NOT NULL,
+											NoTelp VARCHAR(20) NOT NULL,
+											Agm VARCHAR(20) NOT NULL,
+											StsNkh VARCHAR(20) NOT NULL,
+											JmlhAnak INT(3),
+											AnakNikah INT(3),
+											Kewarganegaraan VARCHAR(50) NOT NULL,
+											Jbtn VARCHAR(50) NOT NULL,
+											PndAkr VARCHAR(100) NOT NULL,
+											Email VARCHAR(100) NOT NULL,
+											GolDar VARCHAR(10) NOT NULL,
+											ContDar VARCHAR(100) NOT NULL,
+											NoKTP VARCHAR(100) NOT NULL,
+											NoKK VARCHAR(100) NOT NULL,
+											FOREIGN KEY (NoPeg) REFERENCES tbl_ProfPeg(NoPeg)
+										)");
+				$gaji = mysqli_query($dbcon,"CREATE TABLE `tbl_GajiPeg`(
+										IdGaji INT(9) NOT NULL PRIMARY KEY AUTO_INCREMENT,
+										NoPeg INT(9) NOT NULL,
+										TunjanganJbtn INT(10) NOT NULL,
+										TunjanganPerumahan INT(10) NOT NULL,
+										TunjanganTransport INT(10) NOT NULL,
+										TunjanganIstri INT(10) NOT NULL,
+										TunjanganAnak INT(10) NOT NULL,
+										TunjanganKebijakan INT(10) NOT NULL,
+										THR INT(10) NOT NULL,
+										PotIuranJamsostek INT(10) NOT NULL,
+										PotIuranBPJS INT(10) NOT NULL,
+										PotIuranKop INT(10) NOT NULL,
+										DendaLambat INT(10) NOT NULL,
+										DendaKetidakhadiran INT(10) NOT NULL,
+										PotMinCuti INT(10) NOT NULL,
+										Cash INT(10) NOT NULL,
+										Bln INT(2) NOT NULL,
+										Thn INT(4) NOT NULL,
+										waktu TIMESTAMP,
+										FOREIGN KEY (NoPeg) REFERENCES tbl_ProfPeg(NoPeg)
+									)");
+				$online_usr = mysqli_query($dbcon,"CREATE TABLE `online` (
+  											`id` int(10) NOT NULL PRIMARY KEY AUTO_INCREMENT,
+ 											`nick` varchar(50) COLLATE latin1_general_ci NOT NULL,
+  											`waktu` time
+											)");
+				$pesan_usr = mysqli_query($dbcon,"CREATE TABLE `pesan` (
+  											`id` int(10) NOT NULL PRIMARY KEY AUTO_INCREMENT,
+  											`nick` varchar(50) COLLATE latin1_general_ci NOT NULL,
+ 											`pesan` varchar(250) COLLATE latin1_general_ci NOT NULL,
+ 											`waktu` time NOT NULL
+											)");
+				$jurnal = mysqli_query($dbcon,"CREATE TABLE tbl_jrnl_peg(
+										id_jrnl_peg INT(6) AUTO_INCREMENT PRIMARY KEY,
+										wkt_jrnl_peg TIMESTAMP,
+										bln_jrnl_peg INT(2) NOT NULL,
+										thn_jrnl_peg VARCHAR(4) NOT NULL,
+										ringkasan_jrnl_peg text NOT NULL,
+										hsl_jrnl_peg text NOT NULL,
+										sts_jrnl_peg VARCHAR(30) NOT NULL,
+										persentase_jrnl_peg VARCHAR(3) NOT NULL,
+										ket_jrnl_peg text NOT NULL,
+										id_usr_peg INT(9),
+										FOREIGN KEY (id_usr_peg) REFERENCES tbl_User(Id_User)
+									)");
+				if($jurnal){
+					$isi_tbl_Agm = mysqli_query($dbcon , "INSERT INTO `tbl_agm` (`IdAgm`, `NmAgm`) VALUES (NULL, 'Islam'), (NULL, 'Kristen'), (NULL, 'Hindu'), (NULL, 'Budha'), (NULL, 'Katolik')");
+					$isi_apps_countries = mysqli_query($dbcon, "INSERT INTO `apps_countries` VALUES (null, 'AF', 'Afghanistan'),
+											(null, 'AL', 'Albania'),
+											(null, 'DZ', 'Algeria'),
+											(null, 'DS', 'American Samoa'),
+											(null, 'AD', 'Andorra'),
+											(null, 'AO', 'Angola'),
+											(null, 'AI', 'Anguilla'),
+											(null, 'AQ', 'Antarctica'),
+											(null, 'AG', 'Antigua and Barbuda'),
+											(null, 'AR', 'Argentina'),
+										    (null, 'AM', 'Armenia'),
+											(null, 'AW', 'Aruba'),
+											(null, 'AU', 'Australia'),
+											(null, 'AT', 'Austria'),
+											(null, 'AZ', 'Azerbaijan'),
+											(null, 'BS', 'Bahamas'),
+											(null, 'BH', 'Bahrain'),
+											(null, 'BD', 'Bangladesh'),
+											(null, 'BB', 'Barbados'),
+											(null, 'BY', 'Belarus'),
+											(null, 'BE', 'Belgium'),
+											(null, 'BZ', 'Belize'),
+											(null, 'BJ', 'Benin'),
+											(null, 'BM', 'Bermuda'),
+											(null, 'BT', 'Bhutan'),
+											(null, 'BO', 'Bolivia'),
+											(null, 'BA', 'Bosnia and Herzegovina'),
+											(null, 'BW', 'Botswana'),
+											(null, 'BV', 'Bouvet Island'),
+											(null, 'BR', 'Brazil'),
+										    (null, 'IO', 'British Indian Ocean Territory'),
+											(null, 'BN', 'Brunei Darussalam'),
+											(null, 'BG', 'Bulgaria'),
+											(null, 'BF', 'Burkina Faso'),
+											(null, 'BI', 'Burundi'),
+											(null, 'KH', 'Cambodia'),
+											(null, 'CM', 'Cameroon'),
+											(null, 'CA', 'Canada'),
+											(null, 'CV', 'Cape Verde'),
+											(null, 'KY', 'Cayman Islands'),
+											(null, 'CF', 'Central African Republic'),
+											(null, 'TD', 'Chad'),
+											(null, 'CL', 'Chile'),
+											(null, 'CN', 'China'),
+											(null, 'CX', 'Christmas Island'),
+											(null, 'CC', 'Cocos (Keeling) Islands'),
+											(null, 'CO', 'Colombia'),
+											(null, 'KM', 'Comoros'),
+											(null, 'CG', 'Congo'),
+											(null, 'CK', 'Cook Islands'),
+											(null, 'CR', 'Costa Rica'),
+											(null, 'HR', 'Croatia (Hrvatska)'),
+											(null, 'CU', 'Cuba'),
+											(null, 'CY', 'Cyprus'),
+											(null, 'CZ', 'Czech Republic'),
+											(null, 'DK', 'Denmark'),
+											(null, 'DJ', 'Djibouti'),
+										    (null, 'DM', 'Dominica'),
+											(null, 'DO', 'Dominican Republic'),
+											(null, 'TP', 'East Timor'),
+											(null, 'EC', 'Ecuador'),
+											(null, 'EG', 'Egypt'),
+											(null, 'SV', 'El Salvador'),
+											(null, 'GQ', 'Equatorial Guinea'),
+											(null, 'ER', 'Eritrea'),
+											(null, 'EE', 'Estonia'),
+											(null, 'ET', 'Ethiopia'),
+											(null, 'FK', 'Falkland Islands (Malvinas)'),
+											(null, 'FO', 'Faroe Islands'),
+											(null, 'FJ', 'Fiji'),
+											(null, 'FI', 'Finland'),
+											(null, 'FR', 'France'),
+											(null, 'FX', 'France, Metropolitan'),
+											(null, 'GF', 'French Guiana'),
+											(null, 'PF', 'French Polynesia'),
+											(null, 'TF', 'French Southern Territories'),
+											(null, 'GA', 'Gabon'),
+											(null, 'GM', 'Gambia'),
+											(null, 'GE', 'Georgia'),
+											(null, 'DE', 'Germany'),
+											(null, 'GH', 'Ghana'),
+											(null, 'GI', 'Gibraltar'),
+											(null, 'GK', 'Guernsey'),
+											(null, 'GR', 'Greece'),
+											(null, 'GL', 'Greenland'),
+											(null, 'GD', 'Grenada'),
+											(null, 'GP', 'Guadeloupe'),
+											(null, 'GU', 'Guam'),
+											(null, 'GT', 'Guatemala'),
+											(null, 'GN', 'Guinea'),
+											(null, 'GW', 'Guinea-Bissau'),
+											(null, 'GY', 'Guyana'),
+											(null, 'HT', 'Haiti'),
+											(null, 'HM', 'Heard and Mc Donald Islands'),
+											(null, 'HN', 'Honduras'),
+											(null, 'HK', 'Hong Kong'),
+											(null, 'HU', 'Hungary'),
+											(null, 'IS', 'Iceland'),
+											(null, 'IN', 'India'),
+											(null, 'IM', 'Isle of Man'),
+											(null, 'ID', 'Indonesia'),
+											(null, 'IR', 'Iran (Islamic Republic of)'),
+											(null, 'IQ', 'Iraq'),
+											(null, 'IE', 'Ireland'),
+											(null, 'IL', 'Israel'),
+											(null, 'IT', 'Italy'),
+											(null, 'CI', 'Ivory Coast'),
+											(null, 'JE', 'Jersey'),
+											(null, 'JM', 'Jamaica'),
+											(null, 'JP', 'Japan'),
+											(null, 'JO', 'Jordan'),
+											(null, 'KZ', 'Kazakhstan'),
+											(null, 'KE', 'Kenya'),
+											(null, 'KI', 'Kiribati'),
+											(null, 'KP', 'Korea, Democratic People s Republic of'),
+											(null, 'KR', 'Korea, Republic of'),
+											(null, 'XK', 'Kosovo'),
+											(null, 'KW', 'Kuwait'),
+											(null, 'KG', 'Kyrgyzstan'),
+											(null, 'LA', 'Lao People s Democratic Republic'),
+											(null, 'LV', 'Latvia'),
+											(null, 'LB', 'Lebanon'),
+											(null, 'LS', 'Lesotho'),
+											(null, 'LR', 'Liberia'),
+											(null, 'LY', 'Libyan Arab Jamahiriya'),
+											(null, 'LI', 'Liechtenstein'),
+											(null, 'LT', 'Lithuania'),
+											(null, 'LU', 'Luxembourg'),
+											(null, 'MO', 'Macau'),
+											(null, 'MK', 'Macedonia'),
+											(null, 'MG', 'Madagascar'),
+											(null, 'MW', 'Malawi'),
+											(null, 'MY', 'Malaysia'),
+											(null, 'MV', 'Maldives'),
+											(null, 'ML', 'Mali'),
+											(null, 'MT', 'Malta'),
+											(null, 'MH', 'Marshall Islands'),
+											(null, 'MQ', 'Martinique'),
+											(null, 'MR', 'Mauritania'),
+											(null, 'MU', 'Mauritius'),
+											(null, 'TY', 'Mayotte'),
+											(null, 'MX', 'Mexico'),
+											(null, 'FM', 'Micronesia, Federated States of'),
+											(null, 'MD', 'Moldova, Republic of'),
+											(null, 'MC', 'Monaco'),
+											(null, 'MN', 'Mongolia'),
+											(null, 'ME', 'Montenegro'),
+											(null, 'MS', 'Montserrat'),
+											(null, 'MA', 'Morocco'),
+											(null, 'MZ', 'Mozambique'),
+											(null, 'MM', 'Myanmar'),
+											(null, 'NA', 'Namibia'),
+											(null, 'NR', 'Nauru'),
+											(null, 'NP', 'Nepal'),
+											(null, 'NL', 'Netherlands'),
+											(null, 'AN', 'Netherlands Antilles'),
+											(null, 'NC', 'New Caledonia'),
+											(null, 'NZ', 'New Zealand'),
+											(null, 'NI', 'Nicaragua'),
+											(null, 'NE', 'Niger'),
+											(null, 'NG', 'Nigeria'),
+											(null, 'NU', 'Niue'),
+											(null, 'NF', 'Norfolk Island'),
+											(null, 'MP', 'Northern Mariana Islands'),
+											(null, 'NO', 'Norway'),
+											(null, 'OM', 'Oman'),
+											(null, 'PK', 'Pakistan'),
+											(null, 'PW', 'Palau'),
+											(null, 'PS', 'Palestine'),
+											(null, 'PA', 'Panama'),
+											(null, 'PG', 'Papua New Guinea'),
+											(null, 'PY', 'Paraguay'),
+											(null, 'PE', 'Peru'),
+											(null, 'PH', 'Philippines'),
+											(null, 'PN', 'Pitcairn'),
+											(null, 'PL', 'Poland'),
+											(null, 'PT', 'Portugal'),
+											(null, 'PR', 'Puerto Rico'),
+											(null, 'QA', 'Qatar'),
+											(null, 'RE', 'Reunion'),
+											(null, 'RO', 'Romania'),
+											(null, 'RU', 'Russian Federation'),
+											(null, 'RW', 'Rwanda'),
+											(null, 'KN', 'Saint Kitts and Nevis'),
+											(null, 'LC', 'Saint Lucia'),
+											(null, 'VC', 'Saint Vincent and the Grenadines'),
+											(null, 'WS', 'Samoa'),
+											(null, 'SM', 'San Marino'),
+											(null, 'ST', 'Sao Tome and Principe'),
+											(null, 'SA', 'Saudi Arabia'),
+											(null, 'SN', 'Senegal'),
+											(null, 'RS', 'Serbia'),
+											(null, 'SC', 'Seychelles'),
+											(null, 'SL', 'Sierra Leone'),
+											(null, 'SG', 'Singapore'),
+											(null, 'SK', 'Slovakia'),
+											(null, 'SI', 'Slovenia'),
+											(null, 'SB', 'Solomon Islands'),
+											(null, 'SO', 'Somalia'),
+											(null, 'ZA', 'South Africa'),
+											(null, 'GS', 'South Georgia South Sandwich Islands'),
+											(null, 'ES', 'Spain'),
+											(null, 'LK', 'Sri Lanka'),
+											(null, 'SH', 'St. Helena'),
+											(null, 'PM', 'St. Pierre and Miquelon'),
+											(null, 'SD', 'Sudan'),
+											(null, 'SR', 'Suriname'),
+											(null, 'SJ', 'Svalbard and Jan Mayen Islands'),
+											(null, 'SZ', 'Swaziland'),
+											(null, 'SE', 'Sweden'),
+											(null, 'CH', 'Switzerland'),
+										    (null, 'SY', 'Syrian Arab Republic'),
+											(null, 'TW', 'Taiwan'),
+											(null, 'TJ', 'Tajikistan'),
+										    (null, 'TZ', 'Tanzania, United Republic of'),
+											(null, 'TH', 'Thailand'),
+											(null, 'TG', 'Togo'),
+											(null, 'TK', 'Tokelau'),
+											(null, 'TO', 'Tonga'),
+											(null, 'TT', 'Trinidad and Tobago'),
+											(null, 'TN', 'Tunisia'),
+											(null, 'TR', 'Turkey'),
+											(null, 'TM', 'Turkmenistan'),
+											(null, 'TC', 'Turks and Caicos Islands'),
+											(null, 'TV', 'Tuvalu'),
+											(null, 'UG', 'Uganda'),
+											(null, 'UA', 'Ukraine'),
+											(null, 'AE', 'United Arab Emirates'),
+											(null, 'GB', 'United Kingdom'),
+											(null, 'US', 'United States'),
+											(null, 'UM', 'United States minor outlying islands'),
+											(null, 'UY', 'Uruguay'),
+										    (null, 'UZ', 'Uzbekistan'),
+											(null, 'VU', 'Vanuatu'),
+											(null, 'VA', 'Vatican City State'),
+											(null, 'VE', 'Venezuela'),
+											(null, 'VN', 'Vietnam'),
+											(null, 'VG', 'Virgin Islands (British)'),
+											(null, 'VI', 'Virgin Islands (U.S.)'),
+											(null, 'WF', 'Wallis and Futuna Islands'),
+											(null, 'EH', 'Western Sahara'),
+											(null, 'YE', 'Yemen'),
+											(null, 'ZR', 'Zaire'),
+											(null, 'ZM', 'Zambia'),
+											(null, 'ZW', 'Zimbabwe')");
+					$isi_tbl_User = mysqli_query($dbcon, "INSERT INTO `tbl_user` (`Id_User`, `Uname`, `Pass`, `Lvl`) VALUES (NULL, 'admin', 'admin', '1'), (NULL, 'dito', 'dito', '2'), (NULL, 'cahya', 'cahya', '3')");
+					$isi_tbl_Jbtn = mysqli_query($dbcon, "INSERT INTO `tbl_jbtn` (`IdJbtn`, `NmJbtn`, `Gapok`, `Level`, `TunjanganJbtn`) VALUES (NULL, 'Accounting', '1000000', 'B', '10'), (NULL, 'Marketing', '1500000', 'A', '20')");
+					if($isi_tbl_Jbtn){
+						echo"Sukses";
+					}
+					else{
+						echo"gagal";
+					}
+				}else{
+					echo"gagal";
+				}
+			}
+		}else{
+			$dbname = 'db_dbase_R';
+			$dbcon = mysqli_connect($servername,$username,$password,$dbname);
+		}
+	}
+?>
